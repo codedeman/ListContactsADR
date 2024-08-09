@@ -50,6 +50,8 @@ dev_dependencies:
   flutter_lints: ^4.0.0
   build_runner: ^2.1.5
   json_serializable: ^6.0.1
+  url_launcher: ^6.1.7
+  mockito: ^5.0.17
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

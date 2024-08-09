@@ -4,23 +4,39 @@ import '../ViewModel/UserViewModel.dart';
 import 'UserDetailsView.dart';
 import '../UseCases/UseCases.dart';
 
-class UserListView extends StatelessWidget {
+class UserListView extends StatefulWidget {
   @override
+  _UserListViewState createState() => _UserListViewState();
+}
+
+class _UserListViewState extends State<UserListView> {
+  int _currentPage = 1;
   final ScrollController _scrollController = ScrollController();
 
-  UserListView() {
+  @override
+  void initState() {
+    super.initState();
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+      if (_scrollController.position.extentAfter < 300) {
         _loadMoreUsers();
       }
     });
   }
-  void _loadMoreUsers() {
-    final userViewModel = _scrollController.position.context?.findAncestorWidgetOfExactType<ChangeNotifierProvider<UserViewModel>>()?.create;
-    userViewModel?.fetchUsers(pageNum: userViewModel.pageNum);
-  }
-  Widget build(BuildContext context) {
 
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _loadMoreUsers() {
+    final userViewModel = Provider.of<UserViewModel>(context, listen: false);
+    _currentPage += 1;
+    userViewModel.fetchUsers(pageNum: _currentPage);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final userViewModel = Provider.of<UserViewModel>(context);
 
     return Scaffold(
@@ -30,6 +46,7 @@ class UserListView extends StatelessWidget {
       body: userViewModel.isFetching && userViewModel.users.isEmpty
           ? Center(child: CircularProgressIndicator())
           : ListView.builder(
+        controller: _scrollController,  // Attach the scroll controller
         itemCount: userViewModel.users.length,
         itemBuilder: (context, index) {
           final user = userViewModel.users[index];
@@ -58,7 +75,6 @@ class UserListView extends StatelessWidget {
                   style: TextStyle(color: Colors.blue),
                 ),
                 onTap: () {
-                  userViewModel.loadMoreUsersIfNeeded(currentUser: user);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -74,5 +90,3 @@ class UserListView extends StatelessWidget {
     );
   }
 }
-
-
